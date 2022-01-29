@@ -18,13 +18,13 @@ asvmat.pcoa$values
 asv.plot<-data.frame(asvmat.pcoa$vectors)
 head(asv.plot)
 
-#value matching
+#matching
 asv.plot = cbind(asv.plot, sampledata[,1])
 asv.plot[,35]
 colnames(asv.plot)[35] = 'group'
 
 
-#vasualizing using ggplot2
+#ggplot2
 library(ggplot2)
 library(ggsci)
 x_label<-round(asvmat.pcoa$values$Relative_eig[1]*100,2)
