@@ -1,16 +1,16 @@
 library(vegan)
 
-##¶ÁÈëÎÄ¼ş
-#OTU ·á¶È±í
-otu <- read.csv("C:/Users/mumua/Desktop/16s paper/PCoA/ASV_table_PCoA_BW.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
+##è¯»å…¥æ–‡ä»¶
+#OTU ä¸°åº¦è¡¨
+otu <- read.csv("ASV_table.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
 otu <- data.frame(t(otu))
 
-#Ñù±¾·Ö×éÎÄ¼ş
-group <- read.csv("C:/Users/mumua/Desktop/16s paper/PCoA/sample_data_PCoA _BW.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
+#æ ·æœ¬åˆ†ç»„æ–‡ä»¶
+group <- read.csv("sample_data_PCoA.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
 
-#£¨1£©Ö±½ÓÊäÈë OTU ·á¶È±í£¬ÔÚ²ÎÊıÖĞÖ¸¶¨¾àÀëÀàĞÍ
-#Ê¹ÓÃ Bray-Curtis ¾àÀë²â¶È
+#ï¼ˆ1ï¼‰ç›´æ¥è¾“å…¥ ASV ä¸°åº¦è¡¨ï¼Œåœ¨å‚æ•°ä¸­æŒ‡å®šè·ç¦»ç±»å‹
+#ä½¿ç”¨ Bray-Curtis è·ç¦»æµ‹åº¦
 adonis_result <- adonis(otu~Type, group, distance = 'bray', permutations = 1000)
 
-#²é¿´½á¹û
+#æŸ¥çœ‹ç»“æœ
 adonis_result
