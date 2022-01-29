@@ -1,24 +1,24 @@
 library(vegan)
 
-##¶ÁÈëÎÄ¼ş
-#OTU ·á¶È±í
-otu <- read.csv("C:/Users/mumua/Desktop/16s paper/andos/ASV_table_no0.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
+##è¯»å…¥æ–‡ä»¶
+#OTU ä¸°åº¦è¡¨
+otu <- read.csv("ASV_table.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
 otu <- data.frame(t(otu))
 
-#Ñù±¾·Ö×éÎÄ¼ş
-group <- read.csv("C:/Users/mumua/Desktop/16s paper/andos/group.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
+#æ ·æœ¬åˆ†ç»„æ–‡ä»¶
+group <- read.csv("group.csv", header=TRUE, quote="", sep=",",row.names=1,stringsAsFactors = FALSE)
 
-#£¨1£©Ö±½ÓÊäÈë OTU ·á¶È±í£¬ÔÚ²ÎÊıÖĞÖ¸¶¨¾àÀëÀàĞÍ
-#Ê¹ÓÃ Bray-Curtis ¾àÀë²â¶È
+#ï¼ˆ1ï¼‰ç›´æ¥è¾“å…¥ OTU ä¸°åº¦è¡¨ï¼Œåœ¨å‚æ•°ä¸­æŒ‡å®šè·ç¦»ç±»å‹
+#ä½¿ç”¨ Bray-Curtis è·ç¦»æµ‹åº¦
 adonis_result <- adonis(otu~lake, group, distance = 'bray', permutations = 1000)
 
-#²é¿´½á¹û
+#æŸ¥çœ‹ç»“æœ
 adonis_result
 
 
 
 #################################
-#######Á½Á½Åä¶Ô¶Ô±È
+#######ä¸¤ä¸¤é…å¯¹å¯¹æ¯”
 
 #install.packages('devtools')
 #library(devtools)
@@ -43,16 +43,16 @@ dune.pairwise.adonis
 ###########################################
 library(pheatmap)
 library("RColorBrewer")
-# ¶ÁÈ¡±È½ÏÁĞ±í
-asvmat <- read.csv("C:/Users/mumua/Desktop/16s paper/andos/bray_nofree.csv", header=TRUE, quote="", row.names=1)
+# è¯»å–æ¯”è¾ƒåˆ—è¡¨
+asvmat <- read.csv("bray.csv", header=TRUE, quote="", row.names=1)
 
-# ¶ÁÈ¡ÊµÑéÉè¼Æ×¢ÊÍÁĞ·Ö×é
-sampledata <- read.csv("C:/Users/mumua/Desktop/16s paper/andos/group_nofree.csv", header=TRUE, quote="", row.names=1)
+# è¯»å–å®éªŒè®¾è®¡æ³¨é‡Šåˆ—åˆ†ç»„
+sampledata <- read.csv("group.csv", header=TRUE, quote="", row.names=1)
 
-# ×¼±¸ĞĞ/ÁĞ×¢ÊÍ
+# å‡†å¤‡è¡Œ/åˆ—æ³¨é‡Š
 anno_col = data.frame(Group = sampledata$lake, col.names = colnames(sampledata))
 anno_row = data.frame(Group = sampledata$lake, row.names = rownames(sampledata))
-# »æÍ¼
+# ç»˜å›¾
 pheatmap(asvmat,
          treeheight_col=32,treeheight_row=32,
          color = colorRampPalette(rev(brewer.pal(n = 11, name = "RdGy")[2:10]))(100),
