@@ -1,5 +1,5 @@
 library(dada2); packageVersion("dada2")
-path <- "C:/Users/mumua/Desktop/16sraw/1rawseq" # directory containing the fastq files.
+path <- "rawseq" # directory containing the fastq files.
 list.files(path)
 # Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
 fnFs <- sort(list.files(path, pattern="_R1_001.fastq", full.names = TRUE))
@@ -7,11 +7,11 @@ fnRs <- sort(list.files(path, pattern="_R2_001.fastq", full.names = TRUE))
 # Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
 sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
 
-#ĞòÁĞÖÊÁ¿
+#åºåˆ—è´¨é‡
 plotQualityProfile(fnFs[1:2])# quality profiles of the forward reads
 plotQualityProfile(fnRs[1:2])# quality profile of the reverse reads
 
-#ĞòÁĞ¹ıÂËºÍ²Ã¼ô
+#åºåˆ—è¿‡æ»¤å’Œè£å‰ª
 # Place filtered files in filtered/ subdirectory
 filtFs <- file.path(path, "filtered", paste0(sample.names, "_F_filt.fastq.gz"))
 filtRs <- file.path(path, "filtered", paste0(sample.names, "_R_filt.fastq.gz"))
@@ -23,33 +23,33 @@ out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,160),
                      compress=TRUE, multithread=FALSE) # On Windows set multithread=FALSE
 head(out)
 
-#¼ÆËã´íÎóÂÊ
+#è®¡ç®—é”™è¯¯ç‡
 errF <- learnErrors(filtFs, multithread=TRUE)
 errR <- learnErrors(filtRs, multithread=TRUE)
 plotErrors(errF, nominalQ=TRUE)
 
-#»ùÓÚ´íÎóÄ£ĞÍ½øÒ»²½ÖÊ¿ØSample Inference
+#åŸºäºé”™è¯¯æ¨¡å‹è¿›ä¸€æ­¥è´¨æ§Sample Inference
 dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
 dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
-dadaFs[[1]]#1Ö¸´úµÚÒ»¸öÑùÆ·£¬ÑùÆ·1µÄÊı¾İÖĞµÃµ½52¸ösequence variants
+dadaFs[[1]]#1æŒ‡ä»£ç¬¬ä¸€ä¸ªæ ·å“ï¼Œæ ·å“1çš„æ•°æ®ä¸­å¾—åˆ°52ä¸ªsequence variants
 
-#ĞòÁĞÆ´½Ó
+#åºåˆ—æ‹¼æ¥
 mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
 # Inspect the merger data.frame from the first sample
 head(mergers[[1]])
 
-#Éú³Éasv±í¸ñ
+#ç”Ÿæˆasvè¡¨æ ¼
 seqtab <- makeSequenceTable(mergers)
-dim(seqtab) #Éú³É5504ASV
+dim(seqtab) #ç”Ÿæˆ5504ASV
 # Inspect distribution of sequence lengths
 table(nchar(getSequences(seqtab)))
 
-#È¥³ıÇ¶ºÏÌåRemove chimeras
+#å»é™¤åµŒåˆä½“Remove chimeras
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
 dim(seqtab.nochim)
-sum(seqtab.nochim)/sum(seqtab)#½á¹û¿ÉÖªÇ¶ºÏÌåÕ¼ÁË17%
+sum(seqtab.nochim)/sum(seqtab)#ç»“æœå¯çŸ¥åµŒåˆä½“å äº†17%
 
-#Í³¼ÆÉÏÊö·ÖÎö²½Öè
+#ç»Ÿè®¡ä¸Šè¿°åˆ†ææ­¥éª¤
 getN <- function(x) sum(getUniques(x))
 track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))
 # If processing a single sample, remove the sapply calls: e.g. replace sapply(dadaFs, getN) with getN(dadaFs)
@@ -57,21 +57,21 @@ colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "n
 rownames(track) <- sample.names
 head(track)
 
-#ĞòÁĞÎïÖÖ×¢ÊÍAssign taxonomy
-taxa <- assignTaxonomy(seqtab.nochim, "C:/Users/mumua/Desktop/microrawdata/toxomy assign/silva_nr99_v138.1_train_set.fa.gz", multithread=TRUE)
-taxa <- addSpecies(taxa, "C:/Users/mumua/Desktop/microrawdata/toxomy assign/silva_species_assignment_v138.1.fa.gz")
+#åºåˆ—ç‰©ç§æ³¨é‡ŠAssign taxonomy
+taxa <- assignTaxonomy(seqtab.nochim, "silva_nr99_v138.1_train_set.fa.gz", multithread=TRUE)
+taxa <- addSpecies(taxa, "silva_species_assignment_v138.1.fa.gz")
 
-#Áí´æÎïÖÖ×¢ÊÍ±äÁ¿£¬È¥³ıĞòÁĞÃû£¬Ö»ÏÔÊ¾ÎïÖÖĞÅÏ¢
+#å¦å­˜ç‰©ç§æ³¨é‡Šå˜é‡ï¼Œå»é™¤åºåˆ—åï¼Œåªæ˜¾ç¤ºç‰©ç§ä¿¡æ¯
 taxa.print <- taxa # Removing sequence rownames for display only
 rownames(taxa.print) <- NULL
 head(taxa.print)
 
-#ÎÄ¼şµ¼³ö
+#æ–‡ä»¶å¯¼å‡º
 setwd(path)
 seqtable.taxa.plus <- cbind('#seq'=rownames(taxa), t(seqtab.nochim), taxa)
-# ASV±í¸ñµ¼³ö
+# ASVè¡¨æ ¼å¯¼å‡º
 write.csv(seqtab.nochim, "dada2_counts.csv", sep="\t", quote=F, row.names = T)
-# ´ø×¢ÊÍÎÄ¼şµÄASV±í¸ñµ¼³ö
+# å¸¦æ³¨é‡Šæ–‡ä»¶çš„ASVè¡¨æ ¼å¯¼å‡º
 write.csv(seqtable.taxa.plus , "dada2_counts.taxon.species.csv", quote=F, row.names=F)
-# trackÎÄ¼ş±£´æ
+# trackæ–‡ä»¶ä¿å­˜
 write.table(track , "dada2_track.txt", sep="\t", quote=F, row.names = F)
