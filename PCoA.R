@@ -1,33 +1,30 @@
 library(vegan)
-asvmat <- read.csv("C:/Users/mumua/Desktop/16s paper/PCoA/ASV_table_PCoA_noFL.csv", header=TRUE, quote="", row.names=1)
-asvmat <- data.frame(t(asvmat)) #×ªÖÃ
-sampledata <- read.csv("C:/Users/mumua/Desktop/16s paper/PCoA/sample_data_PCoA_noFL.csv", header=TRUE, quote="", row.names=1)
+asvmat <- read.csv("ASV_table_PCoA.csv", header=TRUE, quote="", row.names=1)
+asvmat <- data.frame(t(asvmat)) #è½¬ç½®
+sampledata <- read.csv("sample_data_PCoA.csv", header=TRUE, quote="", row.names=1)
 
-#¼ÆËã¾àÀë
+#distance calculation
 bray_dist<-vegdist(asvmat,method = "bray")
 
-#Ê¹ÓÃapeÕâ¸ö°üÖÐµÄpcoa()º¯Êý×öPCoA·ÖÎö
+#PCoA analysis
 library(ape)
 asvmat.pcoa<-pcoa(bray_dist,correction = "none")
 
-#ÓÃÓÚ»­Í¼µÄÊý¾Ý
+#data for visualization
 asvmat.pcoa$vectors
 
-#×ø±êÖáÏÔÊ¾°Ù·Ö±È
+#Axis values
 asvmat.pcoa$values
-
-#ÌáÈ¡Ã¿¸öÑù±¾¶ÔÓ¦PCoA×ø±ê
 asv.plot<-data.frame(asvmat.pcoa$vectors)
 head(asv.plot)
 
-#½«PCoA½á¹ûÓëÑù±¾ÐÅÏ¢½øÐÐÆ¥Åä
+#value matching
 asv.plot = cbind(asv.plot, sampledata[,1])
 asv.plot[,35]
 colnames(asv.plot)[35] = 'group'
-#write.csv(asv.plot, file = "C:/Users/mumua/Desktop/PCoA×ÜÌå.csv")
 
 
-#ÓÃggplotÀ´»­Í¼
+#vasualizing using ggplot2
 library(ggplot2)
 library(ggsci)
 x_label<-round(asvmat.pcoa$values$Relative_eig[1]*100,2)
@@ -36,35 +33,17 @@ x_label
 y_label
 
 fig <- ggplot(asv.plot, aes(x=Axis.1,y=Axis.2,fill=group))+ 
-  # Ñ¡ÔñXÖáYÖá²¢Ó³ÉäÑÕÉ«ºÍÐÎ×´
-  geom_point(shape=21,aes(fill = group,alpha = 0.5),size=2)+ # »­É¢µãÍ¼²¢ÉèÖÃ´óÐ¡
-  geom_hline(yintercept = 0,linetype="dashed",size = 0.3) + # Ìí¼ÓºáÏß
-  geom_vline(xintercept = 0,linetype="dashed",size = 0.3) + # Ìí¼ÓÊúÏß
-  scale_color_igv()+ # ÉèÖÃÑÕÉ«,´Ë´¦ÎªIntegrative Genomics ViewerÅäÉ«
+  # é€‰æ‹©Xè½´Yè½´å¹¶æ˜ å°„é¢œè‰²å’Œå½¢çŠ¶
+  geom_point(shape=21,aes(fill = group,alpha = 0.5),size=2)+ # ç”»æ•£ç‚¹å›¾å¹¶è®¾ç½®å¤§å°
+  geom_hline(yintercept = 0,linetype="dashed",size = 0.3) + # æ·»åŠ æ¨ªçº¿
+  geom_vline(xintercept = 0,linetype="dashed",size = 0.3) + # æ·»åŠ ç«–çº¿
+  scale_color_igv()+ # è®¾ç½®é¢œè‰²,æ­¤å¤„ä¸ºIntegrative Genomics Vieweré…è‰²
   theme(panel.border = element_rect(fill="transparent",color="black", size=1, linetype="solid"),
-        panel.background = element_rect(fill="transparent")) + # ¼ÓÉÏ±ß¿ò,Ö÷ÌâÉèÖÃ
-  stat_ellipse(type = "t",level = 0.95,linetype = 2, size = 0.4)+ # Ìí¼ÓÖÃÐÅÍÖÔ²
-  # ×Ô¶¯ÌáÈ¡Ö÷³É·Ö½âÊÍ¶È½øÐÐ»æÍ¼
+        panel.background = element_rect(fill="transparent")) + # åŠ ä¸Šè¾¹æ¡†,ä¸»é¢˜è®¾ç½®
+  stat_ellipse(type = "t",level = 0.95,linetype = 2, size = 0.4)+ # æ·»åŠ ç½®ä¿¡æ¤­åœ†
+  # è‡ªåŠ¨æå–ä¸»æˆåˆ†è§£é‡Šåº¦è¿›è¡Œç»˜å›¾
   labs(x=paste0("PCoA1 ",x_label,"%"),  
        y=paste0("PCoA2 ",y_label,"%"))+
   scale_fill_manual(values=c("#00c4ff", "#ff9289", "#e199ff", "#96ca00"))+
-  theme(legend.position = "none") # ÉèÖÃÍ¼ÀýÎ»ÖÃ£¬´Ë´¦ÎªÏà¶ÔÎ»ÖÃ
-ggsave("PCoA_lake.tiff", width = 8, height = 8, units = "cm", dpi = 300)
-
-#ÍÖÔ²Ìî³äÀàÐÍ
-fig <- ggplot(asv.plot, aes(x=Axis.1,y=Axis.2,fill=group))+ 
-  # Ñ¡ÔñXÖáYÖá²¢Ó³ÉäÑÕÉ«ºÍÐÎ×´
-  geom_point(shape=21,aes(fill = group,alpha = 0.5),size=3)+ # »­É¢µãÍ¼²¢ÉèÖÃ´óÐ¡
-  geom_hline(yintercept = 0,linetype="dashed",size = 0.3) + # Ìí¼ÓºáÏß
-  geom_vline(xintercept = 0,linetype="dashed",size = 0.3) + # Ìí¼ÓÊúÏß
-  scale_color_igv()+ # ÉèÖÃÑÕÉ«,´Ë´¦ÎªIntegrative Genomics ViewerÅäÉ«
-  theme(panel.border = element_rect(fill="transparent",color="black", size=1, linetype="solid"),
-        panel.background = element_rect(fill="transparent")) + # ¼ÓÉÏ±ß¿ò,Ö÷ÌâÉèÖÃ
-  stat_ellipse(geom = "polygon", level = 0.95, aes(fill = group), alpha = 0.1)+ # Ìí¼ÓÖÃÐÅÍÖÔ²
-  stat_ellipse(type = "norm",level = 0.95,linetype = 2, size = 0.4)+
-  # ×Ô¶¯ÌáÈ¡Ö÷³É·Ö½âÊÍ¶È½øÐÐ»æÍ¼
-  labs(x=paste0("PCoA1 ",x_label,"%"),  
-       y=paste0("PCoA2 ",y_label,"%"))+
-  scale_fill_manual(values=c("#00c4ff", "#ff9289", "#e199ff", "#96ca00"))+
-  theme(legend.position = "none") # ÉèÖÃÍ¼ÀýÎ»ÖÃ£¬´Ë´¦ÎªÏà¶ÔÎ»ÖÃ
+  theme(legend.position = "none") # è®¾ç½®å›¾ä¾‹ä½ç½®ï¼Œæ­¤å¤„ä¸ºç›¸å¯¹ä½ç½®
 ggsave("PCoA_lake.tiff", width = 8, height = 8, units = "cm", dpi = 300)
