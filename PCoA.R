@@ -1,6 +1,6 @@
 library(vegan)
 asvmat <- read.csv("ASV_table_PCoA.csv", header=TRUE, quote="", row.names=1)
-asvmat <- data.frame(t(asvmat)) #转置
+asvmat <- data.frame(t(asvmat))
 sampledata <- read.csv("sample_data_PCoA.csv", header=TRUE, quote="", row.names=1)
 
 #distance calculation
