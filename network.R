@@ -1,58 +1,58 @@
 #install.packages("reshape2")
 library(reshape2)
-#ÊäÈëÊı¾İ
-asv <- read.csv("C:/Users/mumua/Desktop/16s paper/network/asv_network.csv", header=TRUE, quote="", row.names=1)
-tax <- read.csv("C:/Users/mumua/Desktop/16s paper/network/tax.csv", header=TRUE, quote="", row.names=1)
+#è¾“å…¥æ•°æ®
+asv <- read.csv("asv_network.csv", header=TRUE, quote="", row.names=1)
+tax <- read.csv("tax.csv", header=TRUE, quote="", row.names=1)
 
-##×ª»»Îª±ßÁĞ±í£¬¼´ asv ºÍÑù±¾µÄ¶ÔÓ¦¹ØÏµ
-#½á¹ûÖĞ£¬ËùÓĞ·Ç 0 µÄÖµ´ú±í¸Ã asv ÔÚ¸ÃÑù±¾ÖĞ´æÔÚ·á¶È
+##è½¬æ¢ä¸ºè¾¹åˆ—è¡¨ï¼Œå³ asv å’Œæ ·æœ¬çš„å¯¹åº”å…³ç³»
+#ç»“æœä¸­ï¼Œæ‰€æœ‰é 0 çš„å€¼ä»£è¡¨è¯¥ asv åœ¨è¯¥æ ·æœ¬ä¸­å­˜åœ¨ä¸°åº¦
 edge <- asv
 edge$ASV <- rownames(edge)
 edge <- reshape2::melt(edge, id = 'ASV')
 
-#É¾³ı²»´æÔÚµÄ±ß
-#¼´È¥³ı 0 ·á¶ÈµÄÖµ£¬¸Ã OTU ²»ÔÚ¸ÃÑù±¾ÖĞ´æÔÚ
+#åˆ é™¤ä¸å­˜åœ¨çš„è¾¹
+#å³å»é™¤ 0 ä¸°åº¦çš„å€¼ï¼Œè¯¥ OTU ä¸åœ¨è¯¥æ ·æœ¬ä¸­å­˜åœ¨
 edge <- subset(edge, value != 0)
 
-#ĞŞ¸ÄÁĞÃû³Æ£¨ÒÔ±ãºóĞøÈí¼şÊ¶±ğ£©£¬ÆäÖĞÈ¨ÖØ¿É±íÊ¾Îª OTU ÔÚÑù±¾ÖĞµÄ·á¶È
+#ä¿®æ”¹åˆ—åç§°ï¼ˆä»¥ä¾¿åç»­è½¯ä»¶è¯†åˆ«ï¼‰ï¼Œå…¶ä¸­æƒé‡å¯è¡¨ç¤ºä¸º OTU åœ¨æ ·æœ¬ä¸­çš„ä¸°åº¦
 names(edge) <- c('source', 'target', 'weight')
 
-#Ìí¼ÓÒ»ÁĞ¡°shared name¡±£¬ÒÔ¡°->¡±Á¬½Ó source ºÍ target
-#±ãÓÚ cytoscape ¶ÁÈ¡Ê¶±ğ£¬²¢·ÀÖ¹¶ÁÈ¡ºóµÄÃû³Æ´íÂÒ
+#æ·»åŠ ä¸€åˆ—â€œshared nameâ€ï¼Œä»¥â€œ->â€è¿æ¥ source å’Œ target
+#ä¾¿äº cytoscape è¯»å–è¯†åˆ«ï¼Œå¹¶é˜²æ­¢è¯»å–åçš„åç§°é”™ä¹±
 edge$'shared name' <- paste(edge$source, edge$target, sep = '->')
 
-#Êä³ö±ßÁĞ±í£¬ºóĞø¿Éµ¼ÈëÖÁ cytoscape ÓÃÓÚ¹¹½¨ÍøÂç
+#è¾“å‡ºè¾¹åˆ—è¡¨ï¼Œåç»­å¯å¯¼å…¥è‡³ cytoscape ç”¨äºæ„å»ºç½‘ç»œ
 write.table(edge, 'edge.txt', sep = '\t', quote = FALSE, row.names = FALSE)
 
 
-##»ñÈ¡½ÚµãÊôĞÔÁĞ±í
-#»ñµÃ asv ÔÚ¸÷×éÖĞµÄ·Ö²¼×´Ì¬£¨Venn ·Ö²¼£©
+##è·å–èŠ‚ç‚¹å±æ€§åˆ—è¡¨
+#è·å¾— asv åœ¨å„ç»„ä¸­çš„åˆ†å¸ƒçŠ¶æ€ï¼ˆVenn åˆ†å¸ƒï¼‰
 asv[asv>0] <- 1
 asv$venn <- apply(asv, 1, function(x) paste(x, collapse = '-'))
 asv <- asv[unique(edge$source), ]
 
-#asv ÊôĞÔÁĞ±í
+#asv å±æ€§åˆ—è¡¨
 node_asv <- data.frame(
-  'shared name' = rownames(asv),  #asv Ãû³Æ£¬ÒÔ¡°shared name¡±ÃüÃûÁĞÃû³Æ£¬±ãÓÚ cytoscape ¶ÁÈ¡Ê¶±ğ£¬²¢·ÀÖ¹¶ÁÈ¡ºóµÄÃû³Æ´íÂÒ
-  group1 = tax[unique(edge$source),'Phylum'],  #ÓÃÓÚºóĞø°´Ö¸¶¨·Ö×é¸³ÖµÑÕÉ«£¬ÕâÀï¶¨ÒåÎª OTU ËùÊôµÄÃÅ·ÖÀàË®Æ½
-  group2 = 'asv',  #ÓÃÓÚºóĞø°´Ö¸¶¨·Ö×é¶¨ÒåĞÎ×´£¬ÕâÀïÍ³Ò»·Ö×éÎª¡°asv¡±
-  group3 = asv$venn,  #ÓÃÓÚºóĞø°´Ö¸¶¨·Ö×éµ÷Õû¾ÛÈº£¬°´ asv ÔÚ¸÷×éÖĞµÄ·Ö²¼×´Ì¬¶¨Òå
+  'shared name' = rownames(asv),  #asv åç§°ï¼Œä»¥â€œshared nameâ€å‘½ååˆ—åç§°ï¼Œä¾¿äº cytoscape è¯»å–è¯†åˆ«ï¼Œå¹¶é˜²æ­¢è¯»å–åçš„åç§°é”™ä¹±
+  group1 = tax[unique(edge$source),'Phylum'],  #ç”¨äºåç»­æŒ‰æŒ‡å®šåˆ†ç»„èµ‹å€¼é¢œè‰²ï¼Œè¿™é‡Œå®šä¹‰ä¸º OTU æ‰€å±çš„é—¨åˆ†ç±»æ°´å¹³
+  group2 = 'asv',  #ç”¨äºåç»­æŒ‰æŒ‡å®šåˆ†ç»„å®šä¹‰å½¢çŠ¶ï¼Œè¿™é‡Œç»Ÿä¸€åˆ†ç»„ä¸ºâ€œasvâ€
+  group3 = asv$venn,  #ç”¨äºåç»­æŒ‰æŒ‡å®šåˆ†ç»„è°ƒæ•´èšç¾¤ï¼ŒæŒ‰ asv åœ¨å„ç»„ä¸­çš„åˆ†å¸ƒçŠ¶æ€å®šä¹‰
   stringsAsFactors = FALSE, 
   check.names = FALSE
 )
 
-#Ñù±¾ÊôĞÔÁĞ±í
+#æ ·æœ¬å±æ€§åˆ—è¡¨
 asv <- asv[-ncol(asv)]
 
 node_sample <- data.frame(
-  'shared name' = names(asv),  #Ñù±¾Ãû³Æ£¬ÒÔ¡°shared name¡±ÃüÃûÁĞÃû³Æ£¬±ãÓÚ cytoscape ¶ÁÈ¡Ê¶±ğ£¬²¢·ÀÖ¹¶ÁÈ¡ºóµÄÃû³Æ´íÂÒ
-  group1 = names(asv),  #ÓÃÓÚºóĞø°´Ö¸¶¨·Ö×é¸³ÖµÑÕÉ«£¬Ö¸¶¨Ñù±¾·Ö×é
-  group2 = names(asv),  #ÓÃÓÚºóĞø°´Ö¸¶¨·Ö×é¶¨ÒåĞÎ×´£¬Ö¸¶¨Ñù±¾·Ö×é
-  group3 = names(asv),  #ÓÃÓÚºóĞø°´Ö¸¶¨·Ö×éµ÷Õû¾ÛÈº£¬Ö¸¶¨Ñù±¾·Ö×é
+  'shared name' = names(asv),  #æ ·æœ¬åç§°ï¼Œä»¥â€œshared nameâ€å‘½ååˆ—åç§°ï¼Œä¾¿äº cytoscape è¯»å–è¯†åˆ«ï¼Œå¹¶é˜²æ­¢è¯»å–åçš„åç§°é”™ä¹±
+  group1 = names(asv),  #ç”¨äºåç»­æŒ‰æŒ‡å®šåˆ†ç»„èµ‹å€¼é¢œè‰²ï¼ŒæŒ‡å®šæ ·æœ¬åˆ†ç»„
+  group2 = names(asv),  #ç”¨äºåç»­æŒ‰æŒ‡å®šåˆ†ç»„å®šä¹‰å½¢çŠ¶ï¼ŒæŒ‡å®šæ ·æœ¬åˆ†ç»„
+  group3 = names(asv),  #ç”¨äºåç»­æŒ‰æŒ‡å®šåˆ†ç»„è°ƒæ•´èšç¾¤ï¼ŒæŒ‡å®šæ ·æœ¬åˆ†ç»„
   stringsAsFactors = FALSE, 
   check.names = FALSE
 )
 
-#¶şÕßºÏ²¢¹¹½¨½ÚµãÊôĞÔÁĞ±íºóÊä³ö£¬ºóĞø¿Éµ¼ÈëÖÁ cytoscape ÓÃÓÚµ÷Õû½Úµã¿ÉÊÓ»¯
+#äºŒè€…åˆå¹¶æ„å»ºèŠ‚ç‚¹å±æ€§åˆ—è¡¨åè¾“å‡ºï¼Œåç»­å¯å¯¼å…¥è‡³ cytoscape ç”¨äºè°ƒæ•´èŠ‚ç‚¹å¯è§†åŒ–
 node <- rbind(node_asv, node_sample)
 write.table(node, 'node.txt', sep = '\t', quote = FALSE, row.names = FALSE)
